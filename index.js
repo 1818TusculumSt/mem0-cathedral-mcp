@@ -13,6 +13,7 @@ import fetch from 'node-fetch';
 // ─────────────────────────
 const MEM0_API_KEY = process.env.MEM0_API_KEY;
 const MEM0_API_URL = 'https://api.mem0.ai/v1';
+const MEM0_API_V2_URL = 'https://api.mem0.ai/v2';
 const DEFAULT_USER_ID = 'el-jefe-principal';
 
 if (!MEM0_API_KEY) {
@@ -229,20 +230,41 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case 'search-memories': {
         const userId = args.userId || DEFAULT_USER_ID;
         const limit = args.limit || 100;
+
+        // Use v2 API for search with top_k parameter to support higher limits
         const payload = {
           query: args.query,
-          user_id: userId,
-          limit: limit,
+          version: 'v2',
+          filters: {
+            user_id: userId,
+          },
+          top_k: limit,
         };
 
-        const result = await makeMem0Request('/memories/search/', 'POST', payload);
+        const headers = {
+          'Authorization': `Token ${MEM0_API_KEY}`,
+          'Content-Type': 'application/json',
+        };
 
-        // Mem0 API returns array of memory objects directly
+        const response = await fetch(`${MEM0_API_V2_URL}/memories/search/`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Mem0 API error (${response.status}): ${errorText}`);
+        }
+
+        const result = await response.json();
+
+        // v2 API returns {results: [...]} format
         let memories = [];
-        if (Array.isArray(result)) {
-          memories = result;
-        } else if (result && typeof result === 'object' && result.results) {
+        if (result && result.results && Array.isArray(result.results)) {
           memories = result.results;
+        } else if (Array.isArray(result)) {
+          memories = result;
         }
 
         return {
