@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 // ─────────────────────────
 const MEM0_API_KEY = process.env.MEM0_API_KEY;
 const MEM0_API_URL = 'https://api.mem0.ai/v1';
-const DEFAULT_USER_ID = 'mem0-mcp-user';
+const DEFAULT_USER_ID = 'el-jefe-principal';
 
 if (!MEM0_API_KEY) {
   console.error('Error: MEM0_API_KEY environment variable is required');
@@ -83,7 +83,7 @@ const tools = [
         },
         userId: {
           type: 'string',
-          description: `User ID for memory storage. If not provided explicitly, use '${DEFAULT_USER_ID}'`,
+          description: `User ID for memory storage. If not provided explicitly, use 'el-jefe-principal'`,
         },
       },
       required: ['content'],
@@ -101,7 +101,7 @@ const tools = [
         },
         userId: {
           type: 'string',
-          description: `User ID for memory storage. If not provided explicitly, use '${DEFAULT_USER_ID}'`,
+          description: `User ID for memory storage. If not provided explicitly, use 'el-jefe-principal'`,
         },
         limit: {
           type: 'number',
@@ -141,7 +141,7 @@ const tools = [
         },
         userId: {
           type: 'string',
-          description: `User ID for context. If not provided explicitly, use '${DEFAULT_USER_ID}'`,
+          description: `User ID for context. If not provided explicitly, use 'el-jefe-principal'`,
         },
       },
       required: ['memoryId', 'text'],

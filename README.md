@@ -52,7 +52,7 @@ This MCP server provides **all 6 Mem0 operations**, compared to the basic @mem0/
 
 ### Optional Settings
 
-- Default user ID: `mem0-mcp-user` (automatically used if not specified)
+- Default user ID: `el-jefe-principal` (automatically used if not specified)
 - Default search limit: 100 memories
 
 ## Usage in Claude Desktop
