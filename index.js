@@ -237,16 +237,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const result = await makeMem0Request('/memories/search/', 'POST', payload);
 
+        // Mem0 API returns array of memory objects directly
         let memories = [];
-        if (result && typeof result === 'object') {
-          const rawResults = result.results || [];
-          memories = rawResults
-            .filter(r => r.memory)
-            .map(r => r.memory);
-        } else if (Array.isArray(result)) {
-          memories = result
-            .filter(r => r.memory)
-            .map(r => r.memory);
+        if (Array.isArray(result)) {
+          memories = result;
+        } else if (result && typeof result === 'object' && result.results) {
+          memories = result.results;
         }
 
         return {
