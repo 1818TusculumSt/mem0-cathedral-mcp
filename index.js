@@ -74,13 +74,13 @@ const server = new Server(
 const tools = [
   {
     name: 'add-memory',
-    description: 'Add a new memory. Call this when the user shares information about themselves, their preferences, or anything relevant for future conversations. Also use when the user explicitly asks you to remember something.',
+    description: 'PROACTIVELY save memories throughout conversations. Call this FREQUENTLY when the user: shares personal info (name, location, job, family), expresses preferences/opinions, mentions projects/goals, shares experiences/stories, states facts about themselves, discusses problems they\'re solving, mentions tools/technologies they use, or shares schedules/routines. ALSO save: technical decisions, code patterns they prefer, mistakes to avoid, workflow preferences. Be aggressive - if something might be useful later, SAVE IT. Better to over-save than under-save.',
     inputSchema: {
       type: 'object',
       properties: {
         content: {
           type: 'string',
-          description: 'The content to store in memory',
+          description: 'The content to store in memory. Be specific and include context. Good: "User prefers TypeScript over JavaScript for type safety". Bad: "likes TS"',
         },
         userId: {
           type: 'string',
@@ -92,13 +92,13 @@ const tools = [
   },
   {
     name: 'search-memories',
-    description: 'Search through stored memories. Call this ANYTIME the user asks a question that might be answered by their previous conversations or stored information.',
+    description: 'Search stored memories PROACTIVELY. Call this at the START of conversations to check for relevant context. Call when: user asks about past conversations, user mentions a topic they\'ve discussed before, you\'re about to give advice (check their preferences first!), user asks for help (check what\'s worked/failed before), discussing projects (check project details), making recommendations (check their preferences/constraints). ALSO search before answering questions - the answer might already be in their memories. Search liberally with broad queries.',
     inputSchema: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: "The search query based on what the user is asking. Examples: 'What did I tell you about the weather last week?' or 'What did I tell you about my friend John?'",
+          description: "Search query - use broad terms for better recall. Examples: 'preferences', 'projects', 'Python', 'work'. Include synonyms and related terms in your mental search strategy.",
         },
         userId: {
           type: 'string',
