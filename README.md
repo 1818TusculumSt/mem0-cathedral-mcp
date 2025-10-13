@@ -1,3 +1,5 @@
+![Mem0 Cathedral MCP Logo](logo.png)
+
 # Mem0 Cathedral MCP Server (Python Edition)
 
 **Intelligent memory management for Claude Desktop** - Quality filtering, smart deduplication, and better search triggering.
