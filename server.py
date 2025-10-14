@@ -366,21 +366,34 @@ async def handle_add_memory(args: dict) -> list[TextContent]:
     similar = await find_similar_memories(content, user_id)
     if similar:
         for mem in similar:
-            similarity = calculate_similarity(content, mem.get("memory", ""))
-            if similarity > SIMILARITY_THRESHOLD:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({
-                            "ok": False,
-                            "duplicate": True,
-                            "existing_memory_id": mem.get("id"),
-                            "existing_content": mem.get("memory"),
-                            "similarity": round(similarity, 2),
-                            "suggestion": "Use update-memory to modify existing memory instead",
-                        }, indent=2)
-                    )
-                ]
+            # Handle case where mem might not be a dict
+            try:
+                if not isinstance(mem, dict):
+                    print(f"WARNING: Unexpected memory format: {type(mem)}", file=__import__('sys').stderr)
+                    continue
+
+                memory_content = mem.get("memory", "")
+                if not memory_content:
+                    continue
+
+                similarity = calculate_similarity(content, memory_content)
+                if similarity > SIMILARITY_THRESHOLD:
+                    return [
+                        TextContent(
+                            type="text",
+                            text=json.dumps({
+                                "ok": False,
+                                "duplicate": True,
+                                "existing_memory_id": mem.get("id"),
+                                "existing_content": memory_content,
+                                "similarity": round(similarity, 2),
+                                "suggestion": "Use update-memory to modify existing memory instead",
+                            }, indent=2)
+                        )
+                    ]
+            except AttributeError as e:
+                print(f"WARNING: Duplicate check failed: {e}", file=__import__('sys').stderr)
+                continue
 
     # Enrich content
     enriched_content = enrich_memory_context(content)
