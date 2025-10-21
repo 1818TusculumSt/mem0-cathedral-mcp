@@ -1,34 +1,41 @@
 ![Mem0 Cathedral MCP Logo](logo.png)
 
-# Mem0 Cathedral MCP Server (Python Edition)
+# Mem0 Cathedral MCP Server v12.1.0 (The Silent Oracle)
 
-**Intelligent memory management for Claude Desktop** - Quality filtering, smart deduplication, and better search triggering.
+**Intelligent memory management for Claude Desktop** - AI extraction, auto-recall, silent operations, and advanced features.
 
-## Why Python v2.0?
+## What's New in v12.1.0? 🚀
 
-The original Node.js version created too many low-quality memories with poor context. This Python rewrite adds:
+Complete rewrite bringing feature parity with the API version, including:
 
-- **Quality Filtering**: Rejects trivial acknowledgments and low-value content
-- **Smart Deduplication**: Prevents saving similar/duplicate memories
-- **Context Enrichment**: Automatically adds timestamps and clarifying context
-- **Memory Consolidation**: Tool to find and merge redundant memories
-- **Better Prompting**: Clearer tool descriptions that trigger more reliably in Claude
+- **🤖 AI Extraction Mode**: Pass conversation messages, Mem0's AI extracts memories automatically
+- **🧠 Intelligent Auto-Recall**: Proactive context retrieval with keyword reranking
+- **🤫 Silent Operations**: Minimal responses (`{success: true/false}`) - no chat clutter
+- **📂 Custom Categories**: 12 default categories for organized memories
+- **🕸️ Graph Memory**: Entity relationship tracking for better context
+- **🤝 Multi-Agent Support**: Track memories by agent_id and run_id
+- **⚡ Hybrid Search**: Semantic (Mem0) + Lexical (keyword) matching
+- **🎯 Extraction Instructions**: Guide AI extraction with custom prompts
 
 ## Features
 
 ### Core Operations
-- ✅ **add-memory** - Store memories with quality checks and deduplication
-- ✅ **search-memories** - Semantic search with better Claude triggering
+- ✅ **add-memory** - AI extraction OR manual save with quality checks
+- ✅ **get-context** - Intelligent auto-recall with keyword reranking (NEW!)
+- ✅ **search-memories** - Enhanced semantic search with categories & graph
 - ✅ **get-all-memories** - Retrieve all memories for context loading
 - ✅ **update-memory** - Modify existing memories
 - ✅ **delete-memory** - Remove specific memories
-- ✅ **consolidate-memories** - Find and merge similar memories (NEW!)
+- ✅ **consolidate-memories** - Find and merge similar memories
 
 ### Intelligence Features
+- **AI Extraction**: Mem0's LLM automatically extracts memories from conversations
 - **Quality Gating**: Minimum length, word count, and content validation
 - **Duplicate Detection**: Semantic similarity checking before save
+- **Keyword Reranking**: Hybrid semantic + lexical search (15% boost per keyword match)
 - **Context Enrichment**: Auto-adds timestamps and clarifying prefixes
 - **Consolidation**: Identifies redundant memories for cleanup
+- **Silent Operations**: No verbose responses cluttering your chat
 
 ## Installation
 
@@ -89,40 +96,66 @@ SIMILARITY_THRESHOLD = 0.85 # Deduplication threshold (0.0-1.0)
 
 ## Usage Examples
 
-### Adding Memories (with Quality Filtering)
+### Adding Memories - AI Extraction Mode (RECOMMENDED)
 
-**Good memory (will save):**
+**Let Mem0's AI extract automatically:**
+```json
+{
+  "messages": [
+    {"role": "user", "content": "I love pizza but hate pineapple on it"},
+    {"role": "assistant", "content": "I'll remember your pizza preferences!"}
+  ]
+}
 ```
-User: I prefer TypeScript over JavaScript for type safety
-Claude: [Calls add-memory]
-✅ Saved with quality score: 120
+Mem0 extracts: "User loves pizza" + "User dislikes pineapple on pizza"
+
+**Response:** `{"success": true}` (silent operation)
+
+### Adding Memories - Legacy Mode
+
+**Manual extraction with quality filtering:**
+```json
+{
+  "content": "User prefers TypeScript over JavaScript for type safety"
+}
 ```
 
-**Low-quality memory (will reject):**
-```
-User: ok
-Claude: [Calls add-memory]
-❌ Rejected: "Too short, low-value acknowledgment"
+**Response:** `{"success": true}` or `{"success": false}` (rejections are silent)
+
+### Auto-Recall Context
+
+**Get relevant memories for current conversation:**
+```json
+{
+  "currentMessage": "What should I order for dinner?",
+  "recentMessages": [
+    {"role": "user", "content": "I'm hungry"},
+    {"role": "assistant", "content": "What sounds good?"}
+  ]
+}
 ```
 
-**Force save bypass:**
-```python
-# In rare cases, force save low-quality content
-{"content": "ok", "force": true}
+**Response:**
+```json
+{
+  "context": "## User Context\n\n### Food Preferences\n- User loves pizza\n- User dislikes pineapple on pizza\n\n",
+  "count": 2
+}
 ```
 
 ### Searching Memories
 
-The search tool now has clearer triggers. Claude will search when:
-- User mentions past conversations
-- User asks questions about themselves
-- Discussing familiar topics
-- Requesting recommendations
+**Enhanced search with categories and graph:**
+```json
+{
+  "query": "programming languages",
+  "categories": ["technical", "preferences"],
+  "enableGraph": true,
+  "limit": 10
+}
+```
 
-```
-User: What programming languages do I prefer?
-Claude: [Calls search-memories with query: "programming languages preferences"]
-```
+**Use get-context instead for auto-recall** - it includes keyword reranking!
 
 ### Consolidating Memories
 
@@ -144,17 +177,21 @@ Response: Found 5 similar memory pairs:
 - **Protocol**: stdio (standard input/output)
 - **Async**: Full async/await support
 
-## Comparison: Node.js vs Python
+## Version Comparison
 
-| Feature | Node.js (v1.0) | Python (v2.0) |
-|---------|---------------|---------------|
-| Quality Filtering | ❌ | ✅ |
-| Deduplication | ❌ | ✅ |
-| Context Enrichment | ❌ | ✅ |
-| Memory Consolidation | ❌ | ✅ |
-| Smart Search Prompts | ⚠️ Verbose | ✅ Concise |
-| Async Support | ✅ | ✅ |
-| Native Mem0 SDK | ❌ | ✅ |
+| Feature | Node.js (v1.0) | Python (v2.0) | Python (v12.1.0) |
+|---------|---------------|---------------|------------------|
+| Quality Filtering | ❌ | ✅ | ✅ |
+| Deduplication | ❌ | ✅ | ✅ |
+| Context Enrichment | ❌ | ✅ | ✅ |
+| Memory Consolidation | ❌ | ✅ | ✅ |
+| AI Extraction | ❌ | ❌ | ✅ |
+| Auto-Recall | ❌ | ❌ | ✅ |
+| Silent Operations | ❌ | ❌ | ✅ |
+| Custom Categories | ❌ | ❌ | ✅ |
+| Graph Memory | ❌ | ❌ | ✅ |
+| Multi-Agent Support | ❌ | ❌ | ✅ |
+| Keyword Reranking | ❌ | ❌ | ✅ |
 
 ## API Quality Features
 
@@ -225,21 +262,47 @@ git pull
 
 ## Version History
 
-- **2.0.0** (Python) - Complete rewrite with intelligent filtering
-- **1.0.0** (Node.js) - Original cathedral implementation
+- **12.1.0** - The Silent Oracle: AI extraction, auto-recall, silent operations, full feature parity with API version
+- **2.0.0** - Python rewrite with intelligent filtering, deduplication, consolidation
+- **1.0.0** - Original Node.js cathedral implementation
 
-## Migration from Node.js
+## Upgrade from v2.0.0 to v12.1.0
 
-1. **Backup existing config** (optional)
-2. **Install Python dependencies**
-3. **Update Claude Desktop config** to use Python
-4. **Test with a few memories** to verify quality filtering
-5. **Run consolidate-memories** to clean up old duplicates
+**What Changed:**
+- Tool responses are now SILENT by default (`{success: true/false}`)
+- New `get-context` tool for intelligent auto-recall
+- `add-memory` now supports AI extraction via `messages` parameter
+- Enhanced search with categories, graph memory, multi-agent support
 
-No data migration needed - same Mem0 API backend!
+**Migration Steps:**
+1. Pull latest code: `git pull`
+2. Restart Claude Desktop
+3. Start using `get-context` for proactive memory recall!
+4. Optionally use `messages` mode for better extraction
+
+**Backward Compatible:** Old `add-memory` with `content` still works!
 
 ## Credits
 
 Originally based on [mem0-cathedral-api](https://github.com/1818TusculumSt/mem0-cathedral-api) for Open WebUI.
 
-Python rewrite by El Jefe Principal with intelligent quality management. 🧠
+v12.1.0 upgrade brings full feature parity between API and MCP versions. 🧠
+
+## Default Memory Categories
+
+The following 12 categories are used when AI extraction is enabled:
+
+- `personal_information` - Name, location, age, family, background
+- `preferences` - Likes, dislikes, favorites, personal tastes
+- `work` - Career, projects, professional information
+- `food_preferences` - Food likes, dislikes, dietary restrictions
+- `technical` - Tech stack, tools, programming languages
+- `goals` - Objectives, plans, aspirations, future intentions
+- `health` - Health conditions, fitness routines, wellness
+- `hobbies` - Interests, activities, pastimes
+- `relationships` - Friends, family, colleagues, connections
+- `location` - Places lived, traveled, or frequently visited
+- `schedule` - Routines, availability, time preferences
+- `communication` - Preferred communication styles and channels
+
+You can override these by passing `customCategories` to `add-memory`.
