@@ -23,6 +23,9 @@ MEM0_API_KEY = os.environ.get("MEM0_API_KEY")
 DEFAULT_USER_ID = "el-jefe-principal"
 VERSION = "12.1.0"
 
+# Graph feature control (requires Mem0 PRO subscription)
+ENABLE_GRAPH_FEATURES = os.getenv("ENABLE_GRAPH_FEATURES", "false").lower() == "true"
+
 # Quality thresholds
 MIN_MEMORY_LENGTH = 20  # Minimum characters for a memory
 MIN_WORD_COUNT = 4      # Minimum words in a memory
@@ -327,7 +330,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "enableGraph": {
                         "type": "boolean",
-                        "description": "Build entity relationships for contextual retrieval",
+                        "description": "Build entity relationships for contextual retrieval. (Requires Mem0 PRO)",
                     },
                     "includes": {
                         "type": "string",
@@ -384,7 +387,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "enableGraph": {
                         "type": "boolean",
-                        "description": "Include entity relationships (default: true)",
+                        "description": "Include entity relationships for better context. (Requires Mem0 PRO)",
                     },
                 },
                 "required": ["currentMessage"],
@@ -427,7 +430,7 @@ async def list_tools() -> list[Tool]:
                     },
                     "enableGraph": {
                         "type": "boolean",
-                        "description": "Include entity relationships in search",
+                        "description": "Include entity relationships in search results. (Requires Mem0 PRO)",
                     },
                 },
                 "required": ["query"],
@@ -562,6 +565,13 @@ async def handle_add_memory(args: dict) -> list[TextContent]:
     if not messages and not content:
         return [TextContent(type="text", text=json.dumps({"success": False, "error": "Either 'messages' or 'content' required"}))]
 
+    # Validate graph feature availability
+    if enable_graph and not ENABLE_GRAPH_FEATURES:
+        return [TextContent(type="text", text=json.dumps({
+            "success": False,
+            "error": "Graph features require Mem0 PRO subscription. Set ENABLE_GRAPH_FEATURES=true if you have PRO access."
+        }))]
+
     # MODE 1: AI EXTRACTION (Mem0 native - RECOMMENDED)
     if messages:
         # Build enriched metadata
@@ -665,7 +675,21 @@ async def handle_get_context(args: dict) -> list[TextContent]:
     user_id = args.get("userId", DEFAULT_USER_ID)
     agent_id = args.get("agentId")
     max_memories = args.get("maxMemories", 10)
-    enable_graph = args.get("enableGraph", True)
+    enable_graph = args.get("enableGraph", False)
+
+    # Validate graph feature availability
+    if enable_graph and not ENABLE_GRAPH_FEATURES:
+        return [
+            TextContent(
+                type="text",
+                text=json.dumps({
+                    "context": "",
+                    "memories": [],
+                    "count": 0,
+                    "error": "Graph features require Mem0 PRO subscription. Set ENABLE_GRAPH_FEATURES=true if you have PRO access."
+                })
+            )
+        ]
 
     # Cap max_memories
     max_memories = min(max_memories, 20)
@@ -744,6 +768,19 @@ async def handle_search_memories(args: dict) -> list[TextContent]:
     limit = args.get("limit", 10)
     categories = args.get("categories")
     enable_graph = args.get("enableGraph", False)
+
+    # Validate graph feature availability
+    if enable_graph and not ENABLE_GRAPH_FEATURES:
+        return [
+            TextContent(
+                type="text",
+                text=json.dumps({
+                    "results": [],
+                    "count": 0,
+                    "error": "Graph features require Mem0 PRO subscription. Set ENABLE_GRAPH_FEATURES=true if you have PRO access."
+                }, indent=2)
+            )
+        ]
 
     # Cap limit
     limit = min(limit, 100)
